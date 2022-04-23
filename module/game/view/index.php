@@ -1,0 +1,1 @@
+Aucune partie n'est en cours
