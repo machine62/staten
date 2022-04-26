@@ -13,7 +13,6 @@ class my_jeu extends my_abstractstaten {
     private $firstserv;
     private $nbserv;
     // ajouter etat du point en cours
-    private $stateserv; // premiere ou deuxieme service
     private $stateservball; // premier ou deuxieme balle
     private $stateservend; // si true, le service (premier ou deuxieme est passé le jeu est en cours ...) si false le service est en cours
 
@@ -40,19 +39,12 @@ class my_jeu extends my_abstractstaten {
         $this->initstate();
     }
 
-    private function initstate() {
-        $this->stateserv = 1; // premiere ou deuxieme service
+    public function initstate() {
         $this->stateservball = 1; // premiere ou deuxieme balle
         $this->stateservend = false; // premiere ou deuxieme balle
     }
 
-    public function getstateserv() {
-        return $this->stateserv;
-    }
-
-    public function setstatesecondserv() {
-         $this->stateserv = 2;
-    }
+ 
 
     public function getstateservball() {
         return $this->stateservball;

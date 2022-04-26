@@ -351,11 +351,7 @@ class module_game extends abstract_module {
     }
 
     public function _eventchangecurrentserv() {
-        if ($this->game->getCurrentServ() == $this->game->joueur1()) {
-            $this->game->setCurrentServ($this->game->joueur2());
-        } else {
-            $this->game->setCurrentServ($this->game->joueur1());
-        }
+     
         // on enregistre evenement pour reconstitution du match 
         $this->game->getStory()->addevent(my_story::SWITCHSERV, $this->game->getCurrentServ());
 
@@ -364,7 +360,14 @@ class module_game extends abstract_module {
     }
 
     public function _eventservok() {
-        $constevent = my_story::SERVOK1;
+          $numball = $this->game->getCurrentSet()->getCurrentJeu()->getstateservball();
+
+        if ($numball == 1) { //premiere balle
+            $constevent = my_story::SERVOK1;
+        } elseif ($numball == 2) {// duxieme balle
+            $constevent = my_story::SERVOK2;
+        }
+        
 
         // on enregistre evenement pour reconstitution du match 
         $this->game->getStory()->addevent($constevent, $this->game->getCurrentServ());
@@ -374,44 +377,92 @@ class module_game extends abstract_module {
     }
 
     public function _eventservfault() {
-        //: plusieurs cas de figure
-        //1 service faute premier service 1ere balle
-        //2 service faute premier service deuxieme balle => second service
-        //3 service faute deuxieme service premiere balle
-        //4 service faute deuxieme service deuxieme balle => double faute
 
-        $numserv = $this->game->getCurrentSet()->getCurrentJeu()->getstateserv();
         $numball = $this->game->getCurrentSet()->getCurrentJeu()->getstateservball();
 
-        if ($numserv == 1) { // premier service
-            if ($numball == 1) { //premiere balle
-                $this->game->getStory()->addevent(my_story::SERVFAULES1B1, $this->game->getCurrentServ());
-            } elseif ($numball == 2) {// duxieme balle
-                $this->game->getStory()->addevent(my_story::SERVFAULES1B2, $this->game->getCurrentServ());
-            }
-        } elseif ($numserv == 2) { //deuxieme service
-            if ($numball == 1) { //premiere balle
-                $this->game->getStory()->addevent(my_story::SERVFAULES2B1, $this->game->getCurrentServ());
-            } elseif ($numball == 2) {//deuxieme ball
-                $this->game->getStory()->addevent(my_story::SERVFAULES2B2, $this->game->getCurrentServ());
-            }
+        if ($numball == 1) { //premiere balle
+            $this->game->getStory()->addevent(my_story::SERVFAULEB1, $this->game->getCurrentServ());
+        } elseif ($numball == 2) {// duxieme balle
+            $this->game->getStory()->addevent(my_story::SERVFAULEB2, $this->game->getCurrentServ());
         }
 
+        $this->saveGameFile($this->game);
+        _root::redirect('game::index');
+    }
+
+    public function _eventfaultreturn() {
+        $playeradverse = null;
+        if ($this->game->getCurrentServ() == $this->game->joueur1()) {
+            $playeradverse = $this->game->joueur2();
+        } else {
+            $playeradverse = $this->game->joueur1();
+        }
+
+        $this->game->getStory()->addevent(my_story::RETURNFAULT, $playeradverse);
 
 
         $this->saveGameFile($this->game);
         _root::redirect('game::index');
     }
 
+    public function _eventwinreturn() {
+        $playeradverse = null;
+        if ($this->game->getCurrentServ() == $this->game->joueur1()) {
+            $playeradverse = $this->game->joueur2();
+        } else {
+            $playeradverse = $this->game->joueur1();
+        }
+
+        $this->game->getStory()->addevent(my_story::RETURNWIN, $playeradverse);
+
+
+        $this->saveGameFile($this->game);
+        _root::redirect('game::index');
+    }
+
+    public function _eventfaultoutj1() {
+
+        $this->game->getStory()->addevent(my_story::FAULTOUT, $this->game->joueur1());
+        $this->saveGameFile($this->game);
+        _root::redirect('game::index');
+    }
+
+    public function _eventfaultoutj2() {
+
+        $this->game->getStory()->addevent(my_story::FAULTOUT, $this->game->joueur2());
+        $this->saveGameFile($this->game);
+        _root::redirect('game::index');
+    }
+
+    public function _eventfaultnetj1() {
+
+        $this->game->getStory()->addevent(my_story::FAULTNET, $this->game->joueur1());
+        $this->saveGameFile($this->game);
+        _root::redirect('game::index');
+    }
+
+    public function _eventfaultnetj2() {
+
+        $this->game->getStory()->addevent(my_story::FAULTNET, $this->game->joueur2());
+        $this->saveGameFile($this->game);
+        _root::redirect('game::index');
+    }
+
+    public function _eventservace() {
+        $this->game->getStory()->addevent(my_story::SERVACE, $this->game->getCurrentServ());
+        $this->saveGameFile($this->game);
+        _root::redirect('game::index');
+    }
+
     public function _addpointj1() {
-        $this->game->pointj1();
+        $this->game->getStory()->addevent(my_story::POINT, $this->game->joueur1());
         $this->saveGameFile($this->game);
 
         _root::redirect('game::index');
     }
 
     public function _addpointj2() {
-        $this->game->pointj2();
+        $this->game->getStory()->addevent(my_story::POINT, $this->game->joueur2());
         $this->saveGameFile($this->game);
 
         _root::redirect('game::index');

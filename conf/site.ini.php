@@ -50,7 +50,7 @@ folder.organized=1
 [navigation]
 scriptname=index.php
 var=:nav
-module.default=default
+module.default=welcome
 action.default=index
 layout.erreur=../layout/erreurprod.php
 

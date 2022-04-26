@@ -66,47 +66,66 @@ class my_game extends my_abstractstaten {
         // on va réinitialiser tous les elements non stable (score ...)
         $this->resetGame();
         $this->currentServ = $this->getConfig()->getFirstServ();
-//var_dump($tmpevent[$i]);
-        // on veut rejouer la partie, on repasse tous les event juste pour les points
-        for ($i = 0; $i < $last; $i++) {
-            $tmpevent[$i] = json_decode(json_encode($tmpevent[$i]), TRUE);
-
-            //suelement point 
-            if ($tmpevent[$i]["constevent"] == my_story::POINT) {
-                // seulement si point  mais on ne rajoute pas le evenment lié
-                if ($tmpevent[$i]["idPlayer"] == $this->joueur1()->id()) {
-                    $this->pointj1();
-                } else {
-                    $this->pointj2();
-                }
-            }
-
-            //suelement switch serv 
-            if ($tmpevent[$i]["constevent"] == my_story::SWITCHSERV) {
-                // seulement si point  mais on ne rajoute pas le evenment lié
-               
-                if ($tmpevent[$i]["idPlayer"] == $this->joueur1()->id()) {
-                     $this->setCurrentServ($this->joueur1());
-                } else {
-                     $this->setCurrentServ($this->joueur2());
-                }
-            }
-        }
-
-        $this->getStory()->resetevent();
 
         // on veut rejouer la partie, on repasse tous les event juste recuperer l ensemble des evenement sans les points
         for ($i = 0; $i < $last; $i++) {
+             $tmpevent[$i]=  json_decode(json_encode($tmpevent[$i]), TRUE); // format en array 
+             
             //   json_decode(json_encode($tmpevent[$i]), TRUE);
-            // on ajoute l evenement dans tous les cas
-            $p = ($tmpevent[$i]["idPlayer"] == $this->joueur1()->id()) ? $this->joueur1() : $this->joueur2()->id();
-            $this->getStory()->addevent($tmpevent[$i]['constevent'], $p, $tmpevent[$i]['time']);
+            // on ajoute l evenement si ce n 'est pas un point ( les event appelle tous seul les points
+            if (my_story::POINTSCORE != $tmpevent[$i]['constevent']) {
+                $p = ($tmpevent[$i]["idPlayer"] == $this->joueur1()->id()) ? $this->joueur1() : $this->joueur2()->id();
+                $this->getStory()->addevent($tmpevent[$i]['constevent'], $p, $tmpevent[$i]['time']);
+            }
         }
     }
 
     public function redo() {
+        /// on  fait - 1 i le dernier evenement n'est pas un pint
+        // si point, il faut vérifier que l'event precedent ne puisse donner de point (second service, filet, out), 
+        // si c'est le cas il faut faire -2 car lc'est lavant dernier evtn qui genere le dernier event
+        // il en va de meme si c'est un event qui donne un point
 
-        $this->replayGame($this->getStory()->jsonSerialize()["event"], 1);
+
+
+        $tContent = $this->getStory()->jsonSerialize()["event"];
+        $lastEle = count($tContent) - 1;
+
+        $numRedo = 1;
+        if (isset($tContent[$lastEle - 1])) {
+            if ($tContent[$lastEle]["constevent"] == my_story::POINTSCORE) {
+                // on a lieux de vérifier l'avant dernier
+                switch ($tContent[$lastEle - 1]["constevent"]) {
+                    case my_story::POINT: // pourvoyeur de point donc a effacer
+                        $numRedo = 2;
+                        break;
+                    case my_story::SERVFAULEB2: // pourvoyeur de point donc a effacer
+                        $numRedo = 2;
+                        break;
+                    case my_story::SERVACE:
+                        $numRedo = 2;
+                        break;
+                    case my_story::FAULTNET:
+                        $numRedo = 2;
+                        break;
+                    case my_story::FAULTOUT:
+                        $numRedo = 2;
+                        break;
+                    case my_story::RETURNFAULT:
+                        $numRedo = 2;
+                        break;
+                    case my_story::RETURNWIN:
+                        $numRedo = 2;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+
+
+        $this->replayGame($this->getStory()->jsonSerialize()["event"], $numRedo);
     }
 
     public function pointj1() {
@@ -117,16 +136,13 @@ class my_game extends my_abstractstaten {
         $this->point($this->joueur2(), $this->joueur1());
     }
 
-    private function point($gagnant, $perdant) {
+    public function pointcallbyevent($gagnant, $perdant) {
 
 
         if ($this->isEnd()) {
             //var_dump("the end");
             //return null;
         }
-
-        $this->story->addevent(my_story::POINT, $gagnant);
-
 
 
         //$this->story->point($gagnant);

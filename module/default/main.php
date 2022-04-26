@@ -6,6 +6,11 @@ class module_default extends abstract_module {
 
     public function before() {
 
+        /// cette page n'est plus accesible
+
+        _root::redirect('welcome::index');
+
+
         //recueraton de la partie en cours
         if (!isset($_SESSION['oldgame'])) {
             $this->game = new my_game();
@@ -19,21 +24,21 @@ class module_default extends abstract_module {
     }
 
     public function _index() {
-        
+
         $oView = new _view('default::index');
         $oView->game = $this->game;
-                
+
         //instancier le module
         $oModuleGamescoreembd = new module_embd_gamescoreembd();
         //recupere la vue du module
         $oViewmodule = $oModuleGamescoreembd->_voir($this->game);
-        
+
         //assigner la vue retournee a votre layout
 
-        
 
 
-        
+
+
 
         $this->oLayout->add('main', $oViewmodule);
         $this->oLayout->add('main', $oView);

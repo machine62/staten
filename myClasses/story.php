@@ -10,21 +10,18 @@ class my_story {
 
     ///evenement
     const POINT = 0;
-    
-    
+    const POINTSCORE = 1; //  incremente le score
     // event service
-    const SWITCHSERV = 1;
-    
-    const SERVOK1 = 2;
-    const SERVOK2 = 3;
-    
-    const SERVFAULES1B1 = 4;
-    const SERVFAULES1B2 = 5;
-    const SERVFAULES2B1 = 6;
-    const SERVFAULES2B2 = 7;
-    
-    
-    
+    const SWITCHSERV = 2;
+    const SERVOK1 = 3;
+    const SERVOK2 = 4;
+    const SERVFAULEB1 = 5;
+    const SERVFAULEB2 = 6;
+    const SERVACE = 7;
+    const FAULTNET = 10;
+    const FAULTOUT = 11;
+    const RETURNWIN = 15;
+    const RETURNFAULT = 16;
 
     public function __construct($game) {
 
@@ -58,37 +55,100 @@ class my_story {
 
         $this->event[$idevent] = $tmpevent;
 
-        
+
+        if ($this->game->joueur1()->id() == $idPlayer) {
+            $player = $this->game->joueur1();
+            $playeraversaire = $this->game->joueur2();
+        } elseif ($this->game->joueur2()->id() == $idPlayer) {
+            $player = $this->game->joueur2();
+            $playeraversaire = $this->game->joueur1();
+        }
+
+        $this->currentStoryEventNumero++;
+
         // evenement declenché supplementaire ( en plus de l ajout de l event 
-        switch ($tmpevent['constevent']) 
-        {
+        switch ($tmpevent['constevent']) {
+            case self::POINTSCORE: // declencheur de l'ajout d un point
+                $this->game->pointcallbyevent($player, $playeraversaire);
+                break;
+            case self::POINT: /// evenement je marque un point direct (pt gaganat ...)
+                $this->addevent(my_story::POINTSCORE, $player);
+                break;
+            case self::FAULTNET: /// evenement je marque un point pour l'adversaire
+                $this->addevent(my_story::POINTSCORE, $playeraversaire);
+                break;
+            case self::FAULTOUT: /// evenement je marque un point  pour l'adversaire
+                $this->addevent(my_story::POINTSCORE, $playeraversaire);
+                break;
+            case self::RETURNFAULT: /// evenement je marque un point  pour l'adversaire
+                $this->addevent(my_story::POINTSCORE, $playeraversaire);
+                break;
+            case self::RETURNWIN: /// evenement je marque un point  pour l'adversaire
+                $this->addevent(my_story::POINTSCORE, $player);
+                break;
             case self::SERVOK1:
                 // on change l 'etat du service
                 $this->game->getCurrentSet()->getCurrentJeu()->setstateservend();
                 break;
-           case self::SERVOK2:
+            case self::SERVOK2:
                 // on change l 'etat du service
                 $this->game->getCurrentSet()->getCurrentJeu()->setstateservend();
                 break;
-            case "xx":
-               //echo "i égal 1";
+            case self::SERVFAULEB1:
+
+                // faute de premier service il faut l'indiquer
+                $this->game->getCurrentSet()->getCurrentJeu()->setstateservsecondball();
                 break;
-           
+
+            case self::SERVFAULEB2:
+
+                // faute de second service donc double faute
+                // on doit generer un point
+                if ($this->game->joueur1() == $this->game->getCurrentServ()) {
+                    $this->addevent(my_story::POINTSCORE, $this->game->joueur2());
+                } elseif ($this->game->joueur2() == $this->game->getCurrentServ()) {
+                    $this->addevent(my_story::POINTSCORE, $this->game->joueur1());
+                }
+
+                break;
+            case self::SERVACE:
+                // on doit generer un point en plus de cet evebnement
+
+                $this->addevent(my_story::POINTSCORE, $this->game->getCurrentServ());
+
+                break;
+            case self::SWITCHSERV:
+                // il faut modifier le serveur courant 
+                // aucun impact autre dans le jeu
+
+                if ($this->game->getCurrentServ() == $this->game->joueur1()) {
+                    $this->game->setCurrentServ($this->game->joueur2());
+                } else {
+                    $this->game->setCurrentServ($this->game->joueur1());
+                }
+
+                break;
+
+            case "xx":
+                //echo "i égal 1";
+                break;
         }
 
 
 
-        
-
-
-
-        $this->currentStoryEventNumero++;
-        if ($withpoint) {
-            if ($constevent == self::POINT) {
-                $this->point($player);
-// $this->currentStoryEventNumero = 0; // remise a 0 des evenement pour prochainpoint   
-            }
-        }
+//                if ($numserv == 1) { // premier service
+//            if ($numball == 1) { //premiere balle
+//                $this->game->getStory()->addevent(my_story::SERVFAULES1B1, $this->game->getCurrentServ());
+//            } elseif ($numball == 2) {// duxieme balle
+//                $this->game->getStory()->addevent(my_story::SERVFAULES1B2, $this->game->getCurrentServ());
+//            }
+//        } elseif ($numserv == 2) { //deuxieme service
+//            if ($numball == 1) { //premiere balle
+//                $this->game->getStory()->addevent(my_story::SERVFAULES2B1, $this->game->getCurrentServ());
+//            } elseif ($numball == 2) {//deuxieme ball
+//                $this->game->getStory()->addevent(my_story::SERVFAULES2B2, $this->game->getCurrentServ());
+//            }
+//        }
     }
 
     private function point($gagnant) {
@@ -122,13 +182,14 @@ class my_story {
             }
 
 // on ne regarde que les evenement point pour le score 
-            if ($elem["constevent"] == self::POINT) {
+            if ($elem["constevent"] == self::POINTSCORE) {
                 if ($elem["idPlayer"] == $nGame->joueur1()->id()) {
-                    $nGame->pointj1();
+                    $nGame->getStory()->addevent($elem["constevent"], $nGame->joueur1(), $elem["time"]);
                     $gameCurentScore["winpt"] = "j1";
                 } else {
-                    $nGame->pointj2();
+                    $nGame->getStory()->addevent($elem["constevent"], $nGame->joueur2(), $elem["time"]);
                     $gameCurentScore["winpt"] = "j2";
+                            
                 }
                 $tgameCurentScore[] = $gameCurentScore;
             }
