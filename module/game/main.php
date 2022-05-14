@@ -14,9 +14,9 @@ class module_game extends abstract_module {
         $this->oLayout->addModule('menu', 'menu::index');
 
         if (isset($_SESSION['game'])) {
-            plugin_debug::addSpy("jeu", $this->game->getCurrentSet()->getCurrentJeu());
-            plugin_debug::addSpy("getallevent", $this->game->getStory()->getallevent());
-            plugin_debug::addSpy("story", $this->game->getStory()->getallsory());
+            //    plugin_debug::addSpy("jeu", $this->game->getCurrentSet()->getCurrentJeu());
+            //    plugin_debug::addSpy("getallevent", $this->game->getStory()->getallevent());
+            //    plugin_debug::addSpy("story", $this->game->getStory()->getallsory());
         }
     }
 
@@ -69,15 +69,206 @@ class module_game extends abstract_module {
         $this->oLayout->add('main', $oView);
     }
 
+    public function _detail() {
+
+
+        //$plug  = new plugin_stat($this->game);
+
+        $oView = new _view("game::detail");
+        $oView->plug = new plugin_stat($this->game);
+        //plugin_debug::addSpy("plug",  $oView->plug);
+        $this->oLayout->add('main', $oView);
+    }
+
     public function _graph() {
+        $oView = new _view('game::graph');
+
+        $oView->getReadableStoryScore = $this->game->getStory()->getReadableStoryScore(); /// en attendant nettoyage 
+
+
+        $oView->graphptss = $this->graph_graphptss();
+        $oView->graphdetails = $this->graph_graphdetail();
+        $oView->graphJoueur1 = $this->graph_graphjoueur1();
+        $oView->graphJoueur2 = $this->graph_graphjoueur2();
+        $this->oLayout->add('main', $oView);
+    }
+
+    private function graph_graphjoueur1() {
+        return $this->graph_graphjoueur("j1");
+    }
+
+    private function graph_graphjoueur2() {
+        return $this->graph_graphjoueur("j2");
+    }
+
+    private function graph_graphjoueur($j) {
+        $graphjoueur = array();
+
+        $plug = new plugin_stat($this->game);
+
+        $oModuleGamestoryembd = new module_embd_graphembd();
+        // parametrage d 'affichage 
+        if ($j == "j1") {
+            $oModuleGamestoryembd->title = "Points sur service - " . $this->game->joueur1()->nomComplet();
+        } else {
+            $oModuleGamestoryembd->title = "Points sur service - " . $this->game->joueur2()->nomComplet();
+        }
+        $oModuleGamestoryembd->graphType = "column";
+        $oModuleGamestoryembd->datagraphcolor = array("#4572A7", "#AA4643", "#4572A7", "#AA4643");
+        $oModuleGamestoryembd->datagraphhead = array("", "Service 1 : Gagné", "Service 1 : perdu", "Service 2 : Gagné", "Service 2 : perdu");
+        $oModuleGamestoryembd->datagraphheadstack = array("", "1", "1", "2", "2");
+        $oModuleGamestoryembd->tablevisible = false;
+
+        // pour chaque set 
+        for ($set = 1; $set <= $plug->getNumberSet(); $set++) {
+            $getsetj = "get" . $j . "set" . $set;
+
+
+            $series[] = array("Set " . $set,
+                $plug->$getsetj(array(my_story::POINTONFIRSTSERV)),
+                $plug->$getsetj(array(my_story::POINTLOOSEONFIRSTSERV)),
+                $plug->$getsetj(array(my_story::POINTONSECONDSERV)),
+                $plug->$getsetj(array(my_story::POINTLOOSEONSECONDSERV)),
+            );
+        }
+
+        $getallj = "getall" . $j;
+        $series[] = array("Total",
+            $plug->$getallj(array(my_story::POINTONFIRSTSERV)),
+            $plug->$getallj(array(my_story::POINTLOOSEONFIRSTSERV)),
+            $plug->$getallj(array(my_story::POINTONSECONDSERV)),
+            $plug->$getallj(array(my_story::POINTLOOSEONSECONDSERV)),
+        );
+
+
+        $oModuleGamestoryembd->series = $series;
+
+        //recupere la vue du module
+        $oViewgraphembd = $oModuleGamestoryembd->_list();
+        //$this->oLayout->add('main', $oViewgraphembd);
+        $graphjoueur[] = $oViewgraphembd;
+
+
+
+
+
+/// passage de service
+        // pour chaque set 
+        for ($set = 1; $set <= $plug->getNumberSet(); $set++) {
+            $oModuleGamestoryembd = new module_embd_graphembd();
+            // parametrage d 'affichage 
+            if ($j == "j1") {
+                $oModuleGamestoryembd->title = "Set " . $set . " - Service " . $this->game->joueur1()->nomComplet();
+            } else {
+                $oModuleGamestoryembd->title = "Set " . $set . " - Service " . $this->game->joueur2()->nomComplet();
+            }
+            $oModuleGamestoryembd->graphType = "pie";
+            $oModuleGamestoryembd->datagraphcolor = array("#4572A7", "#506493", "#AA4643");
+            $oModuleGamestoryembd->datagraphhead = array("", "set " . $set);
+            //    $oModuleGamestoryembd->datagraphheadstack = array("", "1", "1", "2", "2");
+            $oModuleGamestoryembd->tablevisible = false;
+
+
+            $series = array();
+            $getallj = "getall" . $j;
+            $series[] = array("Premier service",
+                $plug->$getallj(array(my_story::SERVOK1, my_story::SERVACE1)),
+            );
+
+            $series[] = array("Second service",
+                $plug->$getallj(array(my_story::SERVOK2, my_story::SERVACE2)),
+            );
+
+            $series[] = array("Double",
+                $plug->$getallj(array(my_story::SERVFAULEB2)),
+            );
+
+
+
+
+            $oModuleGamestoryembd->series = $series;
+
+            //recupere la vue du module
+            $oViewgraphembd = $oModuleGamestoryembd->_list();
+            //$this->oLayout->add('main', $oViewgraphembd);
+            $graphjoueur[] = $oViewgraphembd;
+        }
+
+
+
+
+
+        return $graphjoueur;
+    }
+
+    private function graph_graphdetail() {
+        $graphdetail = array();
+        $plug = new plugin_stat($this->game);
+        //$getReadableStoryScore = $this->game->getStory()->getReadableStoryScore();
+        //module intégrapble 
+        $oModuleGamestoryembd = new module_embd_graphembd();
+        // parametrage d 'affichage 
+        $oModuleGamestoryembd->title = "Répartition des points";
+        $oModuleGamestoryembd->graphType = "column";
+        $oModuleGamestoryembd->datagraphcolor = array("#506493", "#2E4172", "#AA3939", "#FF6363", "#FF1717", "#AA3939", "#FF6363", "#FF1717", "#2E4172",);
+        $oModuleGamestoryembd->datagraphhead = array("", "J1 Coups Gagnants", "J1 ACE", "J2 Fautes", "J2 Retour Fautes", "J2 Doubles", "J2 Coups Gagnants", "J2 ACE", "J1 Fautes", "J1 Retour Fautes", "J1 Doubles");
+        $oModuleGamestoryembd->datagraphheadstack = array("", "1", "1", "1", "1", "1", "2", "2", "2", "2", "2");
+        $oModuleGamestoryembd->tablevisible = false;
+
+        $series = array();
+
+
+
+
+        $series[] = array("Total",
+            $plug->getallj1(array(my_story::POINT)),
+            $plug->getallj1(array(my_story::SERVACE1, my_story::SERVACE2)),
+            $plug->getallj2(array(my_story::FAULTNET, my_story::FAULTOUT)),
+            $plug->getallj2(array(my_story::RETURNFAULT)),
+            $plug->getallj2(array(my_story::SERVFAULEB2)),
+            $plug->getallj2(array(my_story::POINT)),
+            $plug->getallj2(array(my_story::SERVACE1, my_story::SERVACE2)),
+            $plug->getallj1(array(my_story::FAULTNET, my_story::FAULTOUT)),
+            $plug->getallj1(array(my_story::RETURNFAULT)),
+            $plug->getallj1(array(my_story::SERVFAULEB2)),
+        );
+
+
+        for ($numSet = 1; $numSet <= $plug->getNumberSet(); $numSet++) {
+            $series[] = array("Set " . $numSet,
+                $plug->getSetallj1($numSet, array(my_story::POINT)),
+                $plug->getSetallj1($numSet, array(my_story::SERVACE1, my_story::SERVACE2)),
+                $plug->getSetallj2($numSet, array(my_story::FAULTNET, my_story::FAULTOUT)),
+                $plug->getSetallj2($numSet, array(my_story::RETURNFAULT)),
+                $plug->getSetallj2($numSet, array(my_story::SERVFAULEB2)),
+                $plug->getSetallj2($numSet, array(my_story::POINT)),
+                $plug->getSetallj2($numSet, array(my_story::SERVACE1, my_story::SERVACE2)),
+                $plug->getSetallj1($numSet, array(my_story::FAULTNET, my_story::FAULTOUT)),
+                $plug->getSetallj1($numSet, array(my_story::RETURNFAULT)),
+                $plug->getSetallj1($numSet, array(my_story::SERVFAULEB2)),
+            );
+        }
+
+
+
+        $oModuleGamestoryembd->series = $series;
+
+        //recupere la vue du module
+        $oViewgraphembd = $oModuleGamestoryembd->_list();
+        //$this->oLayout->add('main', $oViewgraphembd);
+        $graphdetail[] = $oViewgraphembd;
+
+
+
+        return $graphdetail;
+    }
+
+    private function graph_graphptss() {
+        $graphptss = array();
+
+
         $getReadableStoryScore = $this->game->getStory()->getReadableStoryScore();
 
-        plugin_debug::addSpy("getReadableStoryScore", $getReadableStoryScore);
-
-
-        // menu
-        // $oViewmenu = new _view('game::currentgamemenu');
-        //  $this->oLayout->add('main', $oViewmenu);
         // ______________ par SETS ____________________
         // todo => eventuellement faire une fonction de generation abstraite 
         //module intégrapble 
@@ -94,7 +285,9 @@ class module_game extends abstract_module {
 
         //recupere la vue du module
         $oViewgraphembd = $oModuleGamestoryembd->_list();
-        $this->oLayout->add('main', $oViewgraphembd);
+        //$this->oLayout->add('main', $oViewgraphembd);
+        $graphptss[] = $oViewgraphembd;
+
 
         // ______________ par SETS ____________________
         // ______________ par SET ____________________
@@ -112,20 +305,15 @@ class module_game extends abstract_module {
 
             //recupere la vue du module
             $oViewgraphembd = $oModuleGamestoryembd->_list();
-            $this->oLayout->add('main', $oViewgraphembd);
+            //$this->oLayout->add('main', $oViewgraphembd);
+            $graphptss[] = $oViewgraphembd;
         }
 
         // ______________ par SET ____________________
         // ______________ par set tendance ____________________
         // ______________ tendance  ____________________
 
-
-
-        $oView = new _view('game::graph');
-        $oView->getReadableStoryScore = $this->game->getStory()->getReadableStoryScore();
-        ///plugin_debug::addSpy("getReadableStoryScore", $oView->getReadableStoryScore);
-
-        $this->oLayout->add('main', $oView);
+        return $graphptss;
     }
 
     private function getGraphsetsSeries($getReadableStoryScore) {
@@ -351,7 +539,7 @@ class module_game extends abstract_module {
     }
 
     public function _eventchangecurrentserv() {
-     
+
         // on enregistre evenement pour reconstitution du match 
         $this->game->getStory()->addevent(my_story::SWITCHSERV, $this->game->getCurrentServ());
 
@@ -360,14 +548,14 @@ class module_game extends abstract_module {
     }
 
     public function _eventservok() {
-          $numball = $this->game->getCurrentSet()->getCurrentJeu()->getstateservball();
+        $numball = $this->game->getCurrentSet()->getCurrentJeu()->getstateservball();
 
         if ($numball == 1) { //premiere balle
             $constevent = my_story::SERVOK1;
         } elseif ($numball == 2) {// duxieme balle
             $constevent = my_story::SERVOK2;
         }
-        
+
 
         // on enregistre evenement pour reconstitution du match 
         $this->game->getStory()->addevent($constevent, $this->game->getCurrentServ());
@@ -449,7 +637,17 @@ class module_game extends abstract_module {
     }
 
     public function _eventservace() {
-        $this->game->getStory()->addevent(my_story::SERVACE, $this->game->getCurrentServ());
+        $numball = $this->game->getCurrentSet()->getCurrentJeu()->getstateservball();
+
+        if ($numball == 1) { //premiere balle
+            $constevent = my_story::SERVACE1;
+        } elseif ($numball == 2) {// duxieme balle
+            $constevent = my_story::SERVACE2;
+        }
+
+
+        // on enregistre evenement pour reconstitution du match 
+        $this->game->getStory()->addevent($constevent, $this->game->getCurrentServ());
         $this->saveGameFile($this->game);
         _root::redirect('game::index');
     }

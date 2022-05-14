@@ -1,7 +1,7 @@
 
 <h2>liste des parties</h2>
 
-<table class="table table-condensed text-center  table-bordered table-striped ">
+<table class="table text-center  table-bordered table-striped table-responsive-sm table-gamelist">
     <thead class="table-dark">
         <tr >
             <th></th>
@@ -11,13 +11,13 @@
 
             <th>Score</th>
 
-            <th>accountid</th>
+            <th class=" d-none d-sm-table-cell " >accountid</th>
 
-            <th>ticket</th>
+            <th class="d-none d-sm-table-cell" >ticket</th>
 
             <th>Actions</th>
 
-            <th>fini</th>
+            <th class=" d-none d-sm-table-cell " >fini</th>
         </tr> 
 
     </thead>
@@ -48,7 +48,7 @@
                             <?php endif; ?>
                         <?php endif; ?>
                     </td>
-                    <td rowspan="2" class="align-middle"  > <?php echo date('m/d/Y H:i:s', $oGame->date) ?></td>
+                    <td rowspan="2" class="align-middle"  > <?php echo date('m/d/Y', $oGame->date) ?><br><?php echo date('H:i:s', $oGame->date) ?></td>
 
                     <td class= "<?php echo $j1htmlclasscase; ?>">
                         <?php echo $this->oGamefile[$oGame->gameid]->joueur1()->nomComplet(); ?>
@@ -58,21 +58,21 @@
                      <td class= "<?php echo $j1htmlclasscase; ?>">
                         <?php echo implode(" - ", $this->oGamefile[$oGame->gameid]->getCurrentScore()["j1"]["sets"]) ?>
                     </td>
-                    <td rowspan="2" class="align-middle"  >
+                    <td rowspan="2" class="align-middle d-none d-sm-table-cell "  >
                         <?php if (isset($this->tJoinaccount[$oGame->accountid])) : ?>
                             <?php echo $this->tJoinaccount[$oGame->accountid] ?>
                         <?php else : ?>
                             -
                         <?php endif; ?>
                     </td>
-                    <td rowspan="2" class="align-middle"  > <?php echo $oGame->ticket ?></td>
+                    <td rowspan="2" class="align-middle  d-none d-sm-table-cell"  > <?php echo $oGame->ticket ?></td>
 
                     <td rowspan="2" class="align-middle"  > 
                         <a class="btn btn-light "  href="<?php echo _root::getLink('gamelist::changecurrentgame', array('gameid' => $oGame->gameid)); ?>"> 👀 </a>
                         <a class="btn btn-light lienAConfirmer" datamessage="Non implémenté" href=""> 🎟 </a>
                         <a class="btn btn-warning lienAConfirmer" datamessage="Attention, suppression définitive"  href="<?php echo _root::getLink('gamelist::delete', array('gameid' => $oGame->gameid)); ?>"> 🗑 </a>
                     </td>
-                    <td rowspan="2" class="align-middle"  > 
+                    <td rowspan="2" class="align-middle d-none d-sm-table-cell"  > 
                         <?php if ($this->oGamefile[$oGame->gameid]->isEnd()) : ?>
                             🏆
                         <?php endif; ?>

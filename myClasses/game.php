@@ -73,7 +73,10 @@ class my_game extends my_abstractstaten {
              
             //   json_decode(json_encode($tmpevent[$i]), TRUE);
             // on ajoute l evenement si ce n 'est pas un point ( les event appelle tous seul les points
-            if (my_story::POINTSCORE != $tmpevent[$i]['constevent']) {
+             
+             if (!in_array($tmpevent[$i]['constevent'], my_story::notreplay())) {
+           //  if (my_story::POINTSCORE != $tmpevent[$i]['constevent']) {
+            //if (my_story::POINTSCORE != $tmpevent[$i]['constevent']) {
                 $p = ($tmpevent[$i]["idPlayer"] == $this->joueur1()->id()) ? $this->joueur1() : $this->joueur2()->id();
                 $this->getStory()->addevent($tmpevent[$i]['constevent'], $p, $tmpevent[$i]['time']);
             }
@@ -102,7 +105,10 @@ class my_game extends my_abstractstaten {
                     case my_story::SERVFAULEB2: // pourvoyeur de point donc a effacer
                         $numRedo = 2;
                         break;
-                    case my_story::SERVACE:
+                    case my_story::SERVACE1:
+                        $numRedo = 2;
+                        break;
+                    case my_story::SERVACE2:
                         $numRedo = 2;
                         break;
                     case my_story::FAULTNET:

@@ -27,7 +27,7 @@ $disableserv = $this->game->getCurrentSet()->getCurrentJeu()->getstateservend() 
                 </a>
             </div>
             <div class="col-4" >
-                <a class="btn btn-outline-danger  btn-lg btn-addservice  <?php echo $disableserv ; ?>" href="<?php echo _root::getLink('game::eventfaultreturn'); ?>">
+                <a class="btn btn-outline-danger  btn-lg btn-addservice " href="<?php echo _root::getLink('game::eventfaultreturn'); ?>">
                      retour <br>faute
                 </a>
             </div>
@@ -42,7 +42,7 @@ $disableserv = $this->game->getCurrentSet()->getCurrentJeu()->getstateservend() 
 
             </div>
             <div class="col-4" >
-                <a class="btn btn-outline-success  btn-lg btn-addservice  <?php echo $disableserv ; ?>" href="<?php echo _root::getLink('game::eventwinreturn'); ?>">
+                <a class="btn btn-outline-success  btn-lg btn-addservice  " href="<?php echo _root::getLink('game::eventwinreturn'); ?>">
                     retour <br>gagnant
                 </a> 
             </div>

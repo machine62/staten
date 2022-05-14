@@ -10,18 +10,30 @@ class my_story {
 
     ///evenement
     const POINT = 0;
-    const POINTSCORE = 1; //  incremente le score
+    const POINTONFIRSTSERV = 1;
+    const POINTONSECONDSERV = 2;
+    const POINTLOOSEONFIRSTSERV = 3;
+    const POINTLOOSEONSECONDSERV = 4;
+    const POINTSCORE = 5; //  incremente le score
+    //
+    //
     // event service
-    const SWITCHSERV = 2;
-    const SERVOK1 = 3;
-    const SERVOK2 = 4;
-    const SERVFAULEB1 = 5;
-    const SERVFAULEB2 = 6;
-    const SERVACE = 7;
-    const FAULTNET = 10;
-    const FAULTOUT = 11;
-    const RETURNWIN = 15;
-    const RETURNFAULT = 16;
+    const SWITCHSERV = 10;
+    const SERVOK1 = 15;
+    const SERVOK2 = 16;
+    const SERVFAULEB1 = 17;
+    const SERVFAULEB2 = 18;
+    const SERVACE1 = 19;
+    const SERVACE2 = 20;
+    const FAULTNET = 30;
+    const FAULTOUT = 31;
+    const RETURNWIN = 25;
+    const RETURNFAULT = 26;
+
+    public static function notreplay() {
+
+        return array(self::POINTSCORE); // tous les evenements chainés    
+    }
 
     public function __construct($game) {
 
@@ -54,7 +66,8 @@ class my_story {
         $tmpevent['idPlayer'] = $idPlayer;
 
         $this->event[$idevent] = $tmpevent;
-
+        $playeraversaire = "none";
+        $player = "none";
 
         if ($this->game->joueur1()->id() == $idPlayer) {
             $player = $this->game->joueur1();
@@ -64,12 +77,30 @@ class my_story {
             $playeraversaire = $this->game->joueur1();
         }
 
+
         $this->currentStoryEventNumero++;
 
         // evenement declenché supplementaire ( en plus de l ajout de l event 
         switch ($tmpevent['constevent']) {
             case self::POINTSCORE: // declencheur de l'ajout d un point
+                // ajout stat pt sur point pemier service et point second service
+                //$serveur = $this->game->getCurrentServ();
+                //$marqueur = $player;
+                //$countserv = $this->game->getCurrentSet()->getCurrentJeu()->getstateservball();
+                //if ($serveur == $marqueur) {
+                //if ($countserv == 1) {
+                //$this->addevent(my_story::POINTONFIRSTSERV, $serveur);
+                //} 
+                //else 
+                //{
+                //$this->addevent(my_story::POINTONSECONDSERV, $serveur);
+                //}
+                //}
+                //ajout du point
                 $this->game->pointcallbyevent($player, $playeraversaire);
+
+                 
+                $this->currentStoryPointNumero++;
                 break;
             case self::POINT: /// evenement je marque un point direct (pt gaganat ...)
                 $this->addevent(my_story::POINTSCORE, $player);
@@ -89,16 +120,16 @@ class my_story {
             case self::SERVOK1:
                 // on change l 'etat du service
                 $this->game->getCurrentSet()->getCurrentJeu()->setstateservend();
+               
                 break;
             case self::SERVOK2:
                 // on change l 'etat du service
                 $this->game->getCurrentSet()->getCurrentJeu()->setstateservend();
                 break;
             case self::SERVFAULEB1:
-
-                // faute de premier service il faut l'indiquer
+                 // faute de premier service il faut l'indiquer
                 $this->game->getCurrentSet()->getCurrentJeu()->setstateservsecondball();
-                break;
+                 break;
 
             case self::SERVFAULEB2:
 
@@ -111,7 +142,13 @@ class my_story {
                 }
 
                 break;
-            case self::SERVACE:
+            case self::SERVACE1:
+                // on doit generer un point en plus de cet evebnement
+
+                $this->addevent(my_story::POINTSCORE, $this->game->getCurrentServ());
+
+                break;
+            case self::SERVACE2:
                 // on doit generer un point en plus de cet evebnement
 
                 $this->addevent(my_story::POINTSCORE, $this->game->getCurrentServ());
@@ -159,6 +196,10 @@ class my_story {
         $this->currentStoryPointNumero++;
     }
 
+    private function pointonserv() {
+        
+    }
+
     public function getReadableStoryScore() {
 // on va creer une "game"
 //parcourir la story en recuperant les score courants
@@ -189,7 +230,6 @@ class my_story {
                 } else {
                     $nGame->getStory()->addevent($elem["constevent"], $nGame->joueur2(), $elem["time"]);
                     $gameCurentScore["winpt"] = "j2";
-                            
                 }
                 $tgameCurentScore[] = $gameCurentScore;
             }

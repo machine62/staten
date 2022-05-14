@@ -110,6 +110,25 @@ hr{
 
 }
 
+/*petit ecran taille ecriture dans boutton */
+@media (max-width: 780px) { 
+    
+ 
+
+    .table-gamelist 
+    {
+        padding:0.20em;
+        font-size: 0.9em;
+        font-weight: 200;
+        line-height: 1.1;
+
+
+    }
+
+       
+    
+}
+
 
 .footer{
     background-color: #B4D9E0;
@@ -117,7 +136,6 @@ hr{
     padding-bottom:5px;
     border : solid 1px #9a9da0;;
 }
-
 
 #debugBtn{
     z-index: 2000;
