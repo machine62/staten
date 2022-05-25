@@ -65,12 +65,14 @@
                             -
                         <?php endif; ?>
                     </td>
-                    <td rowspan="2" class="align-middle  d-none d-sm-table-cell"  > <?php echo $oGame->ticket ?></td>
+                    <td rowspan="2" class="align-middle  d-none d-sm-table-cell"  > 
+                          <a class="btn btn-light " href="<?php echo _root::getLink('gamelist::show', array('gameid' => $oGame->gameid)); ?>"> 🎟 </a>
+                    
+                    </td>
 
                     <td rowspan="2" class="align-middle"  > 
                         <a class="btn btn-light "  href="<?php echo _root::getLink('gamelist::changecurrentgame', array('gameid' => $oGame->gameid)); ?>"> 👀 </a>
-                        <a class="btn btn-light lienAConfirmer" datamessage="Non implémenté" href=""> 🎟 </a>
-                        <a class="btn btn-warning lienAConfirmer" datamessage="Attention, suppression définitive"  href="<?php echo _root::getLink('gamelist::delete', array('gameid' => $oGame->gameid)); ?>"> 🗑 </a>
+                         <a class="btn btn-warning lienAConfirmer" datamessage="Attention, suppression définitive"  href="<?php echo _root::getLink('gamelist::delete', array('gameid' => $oGame->gameid)); ?>"> 🗑 </a>
                     </td>
                     <td rowspan="2" class="align-middle d-none d-sm-table-cell"  > 
                         <?php if ($this->oGamefile[$oGame->gameid]->isEnd()) : ?>

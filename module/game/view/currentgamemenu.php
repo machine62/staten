@@ -26,11 +26,11 @@ $confactive = strpos($links, "::conf") !== false ? $active : "";
         <div class="row">
             <div class="col-12">
                 <nav class="nav nav-pills nav-justified  " >
-                    <a class="nav-link <?php echo $indexactive; ?> " href="<?php echo _root::getLink('game::index'); ?>">Scores</a>
-                    <a class="nav-link <?php echo $detailactive; ?> " href="<?php echo _root::getLink('game::detail'); ?>">Detail</a>
-                    <a class="nav-link <?php echo $graphactive; ?> " href="<?php echo _root::getLink('game::graph'); ?>">Graph</a>
-                    <a class="nav-link <?php echo $storyactive; ?> " href="<?php echo _root::getLink('game::story'); ?>">Histoire</a>
-                    <a class="nav-link <?php echo $confactive; ?> " href="<?php echo _root::getLink('game::conf'); ?>">Conf</a>
+                    <a class="nav-link <?php echo $indexactive; ?> " href="<?php echo _root::getLink($this->pagelink.'::index'); ?>">Scores</a>
+                    <a class="nav-link <?php echo $detailactive; ?> " href="<?php echo _root::getLink($this->pagelink.'::detail'); ?>">Detail</a>
+                    <a class="nav-link <?php echo $graphactive; ?> " href="<?php echo _root::getLink($this->pagelink.'::graph'); ?>">Graph</a>
+                    <a class="nav-link <?php echo $storyactive; ?> " href="<?php echo _root::getLink($this->pagelink.'::story'); ?>">Histoire</a>
+                    <a class="nav-link <?php echo $confactive; ?> " href="<?php echo _root::getLink($this->pagelink.'::conf'); ?>">Conf</a>
                 </nav>
 
             </div>

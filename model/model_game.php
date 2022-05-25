@@ -18,6 +18,12 @@ class model_game extends abstract_model{
 	public function findByGameId($uId){
 		return $this->findOne('SELECT * FROM '.$this->sTable.' WHERE gameid=?',$uId );
 	}
+        public function findByGameTicket($uId){
+		return $this->findOne('SELECT * FROM '.$this->sTable.' WHERE ticket=?',$uId );
+	}
+        
+
+        
 	public function findAll(){
 		return $this->findMany('SELECT * FROM '.$this->sTable);
 	}

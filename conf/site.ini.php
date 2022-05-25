@@ -36,7 +36,7 @@ enabled=1
 class=plugin_auth
 module=login::login
 ;liste des modules non concerne par l'auth: separe par des virgules
-module.disabled.list=
+module.disabled.list=externalview
 ;timeout d'inactivite (entre 2 pages), temps en secondes
 session.timeout.enabled=0
 session.timeout.lifetime=1800
