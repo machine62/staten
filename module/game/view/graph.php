@@ -2,10 +2,10 @@
 
 <br><!-- comment -->
 <nav class="nav nav-tabs">
-    <a class="nav-item nav-link active" href="#p1" data-toggle="tab">Points</a>
-    <a class="nav-item nav-link" href="#p2" data-toggle="tab">Points répartition</a>
-    <a class="nav-item nav-link" href="#p3" data-toggle="tab">Joueur 1</a>
-    <a class="nav-item nav-link" href="#p4" data-toggle="tab">Joueur 2</a>
+    <a class="navtab nav-item nav-link active" href="#p1" data-toggle="tab">Points</a>
+    <a class="navtab nav-item nav-link" href="#p2" data-toggle="tab">Points répartition</a>
+    <a class="navtab nav-item nav-link" href="#p3" data-toggle="tab">Joueur 1</a>
+    <a class="navtab nav-item nav-link" href="#p4" data-toggle="tab">Joueur 2</a>
 </nav>
 
 

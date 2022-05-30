@@ -12,7 +12,7 @@ $(document).ready(function () {
     $('.lienAConfirmer').click(function (e) {
         //Annule l'action par défaut qui est la redirection
         e.preventDefault();
-           datamessage = $(this).attr('datamessage');
+        datamessage = $(this).attr('datamessage');
         //Demande une confirmation
         if (window.confirm(datamessage)) {
 
@@ -25,8 +25,14 @@ $(document).ready(function () {
         ;
 
     });
-    
-    
+
+
     $('table.highchart').highchartTable();
-    
+
+// prevent bug affichage graph (resize graph)
+    $("a").on('shown.bs.tab', function (e) {
+        $(window).trigger('resize')
+    });
+
+
 });
